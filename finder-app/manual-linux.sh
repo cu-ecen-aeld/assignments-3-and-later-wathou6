@@ -74,11 +74,12 @@ git clone git://busybox.net/busybox.git
     # TODO:  Configure busybox
     echo "Configuring busybox"
     make distclean
+    sed -i 's/default BASH_IS_NONE/default BASH_IS_ASH/' "shell/Config.src"
     make defconfig
     # Comment the line containing CONFIG_BASH_IS_NONE
-    sed -i 's/^\([^#]*\)CONFIG_BASH_IS_NONE.*/# \1CONFIG_BASH_IS_NONE/' ".config"
+    #sed -i 's/^\([^#]*\)CONFIG_BASH_IS_NONE.*/# \1CONFIG_BASH_IS_NONE/' ".config"
     # Set CONFIG_BASH_IS_ASH=y
-    sed -i '/CONFIG_BASH_IS_ASH/c\CONFIG_BASH_IS_ASH=y' ".config"
+    #sed -i '/CONFIG_BASH_IS_ASH/c\CONFIG_BASH_IS_ASH=y' ".config"
 else
     cd busybox
 fi
