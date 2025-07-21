@@ -1,4 +1,11 @@
 #include "systemcalls.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 /**
  * @param cmd the command to execute with system()
@@ -16,6 +23,15 @@ bool do_system(const char *cmd)
  *   and return a boolean true if the system() call completed with success
  *   or false() if it returned a failure
 */
+    int result = system(cmd);
+    if (result == -1) {
+        return false;
+    }
+    int result2 = WIFEXITED(result);
+    int result3 = WEXITSTATUS(result);
+    if (result2 && result3 != 0) {
+        return false;
+    }
 
     return true;
 }
@@ -58,6 +74,23 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
+    pid_t pid = fork();
+    if (pid < 0) {
+        va_end(args);
+        return false;
+    } else if (pid == 0) {
+        execv(command[0], command);
+        exit(EXIT_FAILURE);
+    } else {
+        int status;
+        waitpid(pid, &status, 0);
+        int result2 = WIFEXITED(status);
+        int result3 = WEXITSTATUS(status);
+        if (result2 && result3 != 0) {
+            va_end(args);
+            return false;
+        }
+    }
 
     va_end(args);
 
@@ -91,7 +124,38 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *   redirect standard out to a file specified by outputfile.
  *   The rest of the behaviour is same as do_exec()
  *
-*/
+*/ 
+    pid_t pid = fork();
+    
+
+    if (pid < 0) {
+        va_end(args);
+        return false;
+    } else if (pid == 0) {
+        int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0644);
+        if (fd < 0) {
+            perror("open");
+            exit(EXIT_FAILURE);
+        }
+        if (dup2(fd, STDOUT_FILENO) < 0) {
+            perror("dup2");
+            close(fd);
+            exit(EXIT_FAILURE);
+        }
+        close(fd);
+        execv(command[0], command);
+        exit(EXIT_FAILURE);
+    } else {
+        int status;
+        waitpid(pid, &status, 0);
+        int result2 = WIFEXITED(status);
+        int result3 = WEXITSTATUS(status);
+        if (result2 && result3 != 0) {
+            va_end(args);
+            return false;
+        }
+    }
+
 
     va_end(args);
 
