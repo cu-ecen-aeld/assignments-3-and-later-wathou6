@@ -19,7 +19,7 @@ void* threadfunc(void* thread_param)
     usleep(thread_func_args->wait_to_release_ms * 1000);
     pthread_mutex_unlock(thread_func_args->mutex);
 
-    return thread_param;
+    return thread_func_args;
 }
 
 
