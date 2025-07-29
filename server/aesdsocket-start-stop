@@ -1,0 +1,31 @@
+#! /bin/sh
+
+DAEMON="aesdsocket"
+OPTS="-d"
+
+case "$1" in
+    start)
+        echo "Starting aesdsocket"
+        start-stop-daemon --start -n $DAEMON -a $DAEMON -- $OPTS
+        echo "aesdsocket started"
+        ;;
+    stop)
+        echo "Stopping aesdsocket"
+        start-stop-daemon --stop -n $DAEMON
+        echo "aesdsocket stopped"
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    status)
+        echo "aesdsocket Status"
+        start-stop-daemon --status -n $DAEMON
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
+
+exit 0
